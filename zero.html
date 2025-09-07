@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Z3RØ A.I</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at center, #0d0d0d, #000000 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      color: #ff0033;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .message {
+      margin: 0.5rem 0;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      max-width: 70%;
+      line-height: 1.4;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .user {
+      background: #1a1a1a;
+      align-self: flex-end;
+      border: 1px solid #444;
+    }
+    .bot {
+      background: #111;
+      align-self: flex-start;
+      border: 1px solid #ff0033;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .input-container {
+      display: flex;
+      padding: 1rem;
+      background: #0a0a0a;
+      border-top: 1px solid #222;
+    }
+    .input-container input {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+    .input-container button {
+      padding: 0.75rem 1.5rem;
+      background: #ff0033;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .input-container button:hover {
+      background: #cc0029;
+    }
+  </style>
+</head>
+<body>
+  <header>Z3RØ A.I</header>
+
+  <div class="chat-container" id="chat-container"></div>
+
+  <div class="input-container">
+    <input type="text" id="user-input" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const inputEl = document.getElementById("user-input");
+      const message = inputEl.value.trim();
+      if (!message) return;
+
+      // Add user message to chat
+      addMessage(message, "user");
+      inputEl.value = "";
+
+      // Call backend proxy
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: message }]
+          }),
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          addMessage("Error: " + data.error, "bot");
+        } else {
+          addMessage(data.reply, "bot");
+        }
+      } catch (err) {
+        addMessage("⚠️ Connection error.", "bot");
+      }
+    }
+
+    function addMessage(text, sender) {
+      const container = document.getElementById("chat-container");
+      const msg = document.createElement("div");
+      msg.className = `message ${sender}`;
+      msg.innerText = text;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+    }
+  </script>
+</body>
+</html>
 
